@@ -1,2 +1,2 @@
-name: buildroot-external-sample
-desc: External tree for demo kernel module
+name: buildroot_external_sample
+desc: External buildroot sample for Jenkins
