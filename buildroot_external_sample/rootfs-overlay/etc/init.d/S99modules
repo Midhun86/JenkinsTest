@@ -1,0 +1,19 @@
+#!/bin/sh
+
+case "$1" in
+start)
+    echo "Loading kernel modules..."
+    # Load the hello_world module
+    modprobe hello_world
+    ;;
+stop)
+    echo "Unloading kernel modules..."
+    modprobe -r hello_world
+    ;;
+*)
+    echo "Usage: $0 {start|stop}"
+    exit 1
+    ;;
+esac
+
+exit 0

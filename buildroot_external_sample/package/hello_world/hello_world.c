@@ -16,6 +16,6 @@ module_init(hello_world_init);
 module_exit(hello_world_exit);
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Your Name");
+MODULE_AUTHOR("Midhun");
 MODULE_DESCRIPTION("A simple Hello World Linux kernel module");
 MODULE_VERSION("1.0");
