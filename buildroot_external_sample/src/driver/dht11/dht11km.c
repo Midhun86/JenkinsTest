@@ -56,12 +56,17 @@
 #include <asm/uaccess.h>	// for put_user 
 
 // include RPi harware specific constants 
-#include <mach/hardware.h>
+// #include <mach/hardware.h>
 
 #define DHT11_DRIVER_NAME "dht11"
 #define RBUF_LEN 256
 #define SUCCESS 0
 #define BUF_LEN 80		// Max length of the message from the device 
+
+#define GPIO_BASE 0x3F200000  // Example for Raspberry Pi; adjust for your hardware
+#define SZ_4K 0x1000          // Size for memory region
+
+#define INTERRUPT_GPIO0 17  
 
 // set GPIO pin g as input 
 #define GPIO_DIR_INPUT(g) *(gpio+((g)/10)) &= ~(7<<(((g)%10)*3))
