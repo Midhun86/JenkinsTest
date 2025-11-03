@@ -51,6 +51,7 @@
 #include <linux/irq.h>
 #include <linux/fcntl.h>
 #include <linux/spinlock.h>
+#include <linux/timekeeping.h>
 
 #include <linux/fs.h>
 #include <asm/uaccess.h>	// for put_user 
@@ -64,7 +65,6 @@
 #define BUF_LEN 80		// Max length of the message from the device 
 
 #define GPIO_BASE 0x3F200000  // Example for Raspberry Pi; adjust for your hardware
-#define SZ_4K 0x1000          // Size for memory region
 
 #define INTERRUPT_GPIO0 17  
 
@@ -87,7 +87,7 @@
 
 // module parameters 
 static int sense = 0;
-static struct timeval lasttv = {0, 0};
+static struct timespec64 lasttv = {0, 0};
 
 static spinlock_t lock;
 
@@ -125,7 +125,7 @@ volatile unsigned *gpio;
 // IRQ handler - where the timing takes place
 static irqreturn_t irq_handler(int i, void *blah, struct pt_regs *regs)
 {
-	struct timeval tv;
+	struct timespec64 tv;
 	long deltv;
 	int data = 0;
 	int signal;
@@ -138,7 +138,7 @@ static irqreturn_t irq_handler(int i, void *blah, struct pt_regs *regs)
 
 	if (sense != -1) {
 		// get current time 
-		do_gettimeofday(&tv);
+		ktime_get_real_ts64(&tv);
 
 		// get time since last interrupt in microseconds 
 		deltv = tv.tv_sec-lasttv.tv_sec;
@@ -220,7 +220,7 @@ static int init_port(void)
 	}
 
 	// remap the GPIO memory 
-	if ((gpio = ioremap_nocache(GPIO_BASE, SZ_4K)) == NULL) {
+	if ((gpio = ioremap(GPIO_BASE, SZ_4K)) == NULL) {
 		printk(KERN_ERR DHT11_DRIVER_NAME ": failed to map GPIO I/O memory\n");
 		return -EBUSY;
 	}
@@ -315,7 +315,7 @@ start_read:
     GPIO_DIR_INPUT(gpio_pin); 	// Change to read
 	
 	//Start timer to time pulse length
-	do_gettimeofday(&lasttv);
+	ktime_get_real_ts64(&lasttv);
 	
 	// Set up interrupts
 	setup_interrupts();
