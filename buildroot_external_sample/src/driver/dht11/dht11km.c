@@ -123,12 +123,14 @@ int valid_gpio_pins[] = { 0, 1, 4, 8, 7, 9, 10, 11, 14, 15, 17, 18, 21, 22, 23,	
 volatile unsigned *gpio;
 
 // IRQ handler - where the timing takes place
-static irqreturn_t irq_handler(int i, void *blah, struct pt_regs *regs)
+static irqreturn_t irq_handler(int irq, void *dev_id)
 {
+	static struct timespec64 lastts = {0, 0};
 	struct timespec64 tv;
 	long deltv;
 	int data = 0;
 	int signal;
+	s64 deltv_ns;
 
 	// use the GPIO signal level 
 	signal = GPIO_READ_PIN(gpio_pin);
@@ -141,9 +143,8 @@ static irqreturn_t irq_handler(int i, void *blah, struct pt_regs *regs)
 		ktime_get_real_ts64(&tv);
 
 		// get time since last interrupt in microseconds 
-		deltv = tv.tv_sec-lasttv.tv_sec;
-			
-		data = (int) (deltv*1000000 + (tv.tv_usec - lasttv.tv_usec));
+		deltv_ns = (tv.tv_sec - lastts.tv_sec) * 1000000000LL + (tv.tv_nsec - lastts.tv_nsec);
+		data = (int)(deltv_ns / 1000); // convert ns to us
 		lasttv = tv;	//Save last interrupt time
 		
 		if((signal == 1)&(data > 40))
@@ -181,7 +182,7 @@ static int setup_interrupts(void)
 	int result;
 	unsigned long flags;
 
-	result = request_irq(INTERRUPT_GPIO0, (irq_handler_t) irq_handler, 0, DHT11_DRIVER_NAME, (void*) gpio);
+	result = request_irq(INTERRUPT_GPIO0, irq_handler, 0, DHT11_DRIVER_NAME, (void*) gpio);
 
 	switch (result) {
 	case -EBUSY:
