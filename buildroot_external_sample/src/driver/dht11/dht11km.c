@@ -144,7 +144,9 @@ static irqreturn_t irq_handler(int irq, void *dev_id)
 
 		// get time since last interrupt in microseconds 
 		deltv_ns = (tv.tv_sec - lastts.tv_sec) * 1000000000LL + (tv.tv_nsec - lastts.tv_nsec);
-		data = (int)(deltv_ns / 1000); // convert ns to us
+		do_div(deltv_ns, 1000);
+		data = (int)deltv_ns;  // quotient after division
+
 		lasttv = tv;	//Save last interrupt time
 		
 		if((signal == 1)&(data > 40))

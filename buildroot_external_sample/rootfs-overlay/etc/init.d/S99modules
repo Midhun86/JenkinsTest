@@ -5,13 +5,13 @@ start)
     echo "Loading kernel modules..."
     # Load the hello_world module
     modprobe hello_world
-    modprobe dht11
+    modprobe dht11km
     modprobe i2c_client_driver
     ;;
 stop)
     echo "Unloading kernel modules..."
     modprobe -r hello_world
-    modprobe -r dht11
+    modprobe -r dht11km
     modprobe -r i2c_client_driver
     ;;
 *)
